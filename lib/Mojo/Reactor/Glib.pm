@@ -12,13 +12,13 @@ Mojo::Reactor::Glib - Glib::MainLoop backend for Mojo
 
 =head1 VERSION
 
-Version 0.001
+Version 0.002
 
 I hope I need not to emphasise that this is in VERY EARLY STAGES OF DEVELOPMENT.
 
 =cut
 
-our $VERSION = '0.001';
+our $VERSION = '0.002';
 
 =head1 SYNOPSIS
 
@@ -57,6 +57,14 @@ sub DESTROY {
 	undef $Glib;
 }
 
+=head1 METHODS
+
+=head2 Mojo::Reactor::Glib->new()
+X<new>
+
+Just the constructor.  You probably won't ever call it yourself.
+
+=cut
 sub new {
 	my $class = shift;
 
@@ -76,9 +84,8 @@ sub new {
 
 #####
 
-=head1 METHODS
-
-=head2 $r->again($id) X<again>
+=head2 $r->again($id)
+X<again>
 
 Runs the timer known by C<$id> again
 
@@ -92,9 +99,10 @@ sub again {
 	}
 }
 
-=head2 $r->io($handle, $cb) X<io>
+=head2 $r->io($handle, $cb)
+X<io>
 
-Assigns a callback function C<$cb> to the IO handle C<$handle>.  This is required before you can use L</watch>.
+Assigns a callback function C<$cb> to the IO handle C<$handle>.  This is required before you can use L<watch|/r-watch-handle-read-write>.
 
 Returns the reactor C<$r> so you can chain the calls.
 
@@ -111,7 +119,8 @@ sub io {
 	return $r;
 }
 
-=head2 $r->is_running() X<is_running>
+=head2 $r->is_running()
+X<is_running>
 
 Returns true if the loop is running, otherwise returns false
 
@@ -121,7 +130,8 @@ sub is_running {
 	return ($r->{loop} ? $r->{loop}->is_running() : 0);
 }
 
-=head2 $r->one_tick() X<one_tick>
+=head2 $r->one_tick()
+X<one_tick>
 
 Does a single L<Glib::MainLoop> iteration.  Returns true if events were dispatched during this iteration
 (whether or not they had been B<Mojo::Reactor::Glib> events), false if nothing happened.
@@ -136,14 +146,15 @@ sub one_tick {
 	}
 }
 
-=head2 $r->recurring($after_sec, $cb) X<recurring>
+=head2 $r->recurring($after_sec, $cb)
+X<recurring>
 
 Starts a recurring timer that beats every C<$after_sec> seconds (N.B. Glib allows for millisecond granularity),
 which will result in C<$cb> being fired.
 
-Returns the B<Glib::Timeout> ID that you can use to L</stop> the timer.
+Returns the B<Glib::Timeout> ID that you can use to L<stop|/r-stop> the timer.
 
-See also L</timer>
+See also L<timer|/r-timer-after_sec-cb>
 
 =cut
 sub recurring {
@@ -152,7 +163,8 @@ sub recurring {
 	$r->_timer(Glib::SOURCE_CONTINUE, @_);
 }
 
-=head2 $r->remove($id) X<remove>
+=head2 $r->remove($id)
+X<remove>
 
 Removes the timer identified by C<$id>, returning true if this was successful, and a false-ish value otherwise.
 
@@ -170,7 +182,8 @@ sub remove {
 	return $removed;
 }
 
-=head2 $r->reset() X<reset>
+=head2 $r->reset()
+X<reset>
 
 Stops all timers and watches.
 
@@ -188,7 +201,8 @@ sub reset {
 	}
 }
 
-=head2 $r->start() X<start>
+=head2 $r->start()
+X<start>
 
 Starts the loop if it isn't already running.
 
@@ -205,7 +219,8 @@ sub start {
 	}
 }
 
-=head2 $r->stop() X<stop>
+=head2 $r->stop()
+X<stop>
 
 Stops the loop.
 
@@ -218,14 +233,15 @@ sub stop {
 	}
 }
 
-=head2 $r->timer($after_sec, $cb) X<timer>
+=head2 $r->timer($after_sec, $cb)
+X<timer>
 
 Starts a one-shot timer that beats after C<$after_sec> seconds (N.B. Glib allows for millisecond granularity),
 which will result in C<$cb> being fired.
 
-Returns the B<Glib::Timeout> ID that you can use to L</stop> or L</again> the timer.
+Returns the B<Glib::Timeout> ID that you can use to L<stop|/r-stop> or L<again|/r-again-id> the timer.
 
-See also L</recurring>.
+See also L<recurring|/r-recurring-after_sec-cb>.
 
 =cut
 sub timer {
@@ -234,14 +250,15 @@ sub timer {
 	$r->_timer(Glib::SOURCE_REMOVE, @_);
 }
 
-=head2 $r->watch($handle, $read, $write) X<watch>
+=head2 $r->watch($handle, $read, $write)
+X<watch>
 
 Adds an IO watch for C<$read> or C<$write> (booleans) on C<$handle>.  If both C<$read>
 and C<$write> are false, it removes the watch.
 
-Requires L</io> to be run on C<$handle> first, as that associates the callback function with the handle.
+Requires L<io|/r-io-handle-cb> to be run on C<$handle> first, as that associates the callback function with the handle.
 
-See also L</io>.
+See also L<io|/r-io-handle-cb>.
 
 =cut
 sub watch {
